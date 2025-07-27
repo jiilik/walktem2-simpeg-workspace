@@ -130,7 +130,7 @@ uncertainties = 0.05 * np.abs(dobs) * np.ones(np.shape(dobs))
 data_object = data.Data(survey, dobs=dobs, standard_deviation=uncertainties)
 
 # estimated host conductivity (S/m)
-estimated_conductivity = 1
+estimated_conductivity = 0.01
 
 # minimum diffusion distance
 d_min = 1250 * np.sqrt(times.min() / estimated_conductivity)
@@ -141,7 +141,7 @@ d_max = 1250 * np.sqrt(times.max() / estimated_conductivity)
 print("MAXIMUM DIFFUSION DISTANCE: {} m".format(d_max))
 
 depth_min = 5  # top layer thickness
-depth_max = 800.0  # depth to lowest layer
+depth_max = 200.0  # depth to lowest layer
 geometric_factor = 1.15  # rate of thickness increase
 
 # Increase subsequent layer thicknesses by the geometric factors until
@@ -222,7 +222,7 @@ plot_1d_layer_model(
     layer_thicknesses, log_conductivity_map * recovered_model_L2, ax=ax1, color="b"
 )
 ax1.grid()
-ax1.set_xlabel(r"Resistivity ($\Omega m$)")
+ax1.set_xlabel(r"Resistivity (Ω·m)")
 ax1.legend(["L2-Model"])
 plt.show()
 
