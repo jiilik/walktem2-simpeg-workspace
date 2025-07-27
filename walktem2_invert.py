@@ -79,17 +79,19 @@ dobs = np.array(dobs)
 #ax.loglog(times, np.abs(dobs), "k-o", lw=3)
 #ax.grid(which="both")
 #ax.set_xlabel("Times (s)")
-#ax.set_ylabel("|B| (T)")
+#ax.set_ylabel("Rx (V/Am2)")
 #ax.set_title("Observed Data")
 #plt.show()
-
 
 
 # Source loop geometry
 source_location = np.array([0.0, 0.0, 1.0])  # (3, ) numpy.array_like
 source_orientation = "z"  # "x", "y" or "z"
 source_current = current  # maximum on-time current (A)
-source_radius = 40.0  # source loop radius (m)
+# 40x40m tx loop is the same area as a 22.6m radius circular looop
+# making an assumption that the fact it is a square doesn't matter
+# due to symmetry. 
+source_radius = 22.6  # source loop radius (m)
 
 # Receiver geometry
 receiver_location = np.array([0.0, 0.0, 1.0])  # or (N, 3) numpy.ndarray
@@ -98,11 +100,11 @@ receiver_orientation = "z"  # "x", "y" or "z"
 # Receiver list
 receiver_list = []
 receiver_list.append(
-    tdem.receivers.PointMagneticFluxDensity(
+    tdem.receivers.PointMagneticField(
         receiver_location, times, orientation=receiver_orientation
     )
 )
-
+    
 # Define the source waveform.
 waveform = tdem.sources.StepOffWaveform()
 
@@ -121,6 +123,8 @@ source_list = [
 survey = tdem.Survey(source_list)
 
 # 5% of the absolute value
+# this number is taken from the tutorial -- 
+# TODO: use some better measure of uncertainty from the real data
 uncertainties = 0.05 * np.abs(dobs) * np.ones(np.shape(dobs))
 
 data_object = data.Data(survey, dobs=dobs, standard_deviation=uncertainties)
@@ -136,7 +140,7 @@ print("MINIMUM DIFFUSION DISTANCE: {} m".format(d_min))
 d_max = 1250 * np.sqrt(times.max() / estimated_conductivity)
 print("MAXIMUM DIFFUSION DISTANCE: {} m".format(d_max))
 
-depth_min = 10  # top layer thickness
+depth_min = 5  # top layer thickness
 depth_max = 800.0  # depth to lowest layer
 geometric_factor = 1.15  # rate of thickness increase
 
@@ -204,31 +208,23 @@ ax1.loglog(times, np.abs(dobs), "k-o")
 ax1.loglog(times, np.abs(dpred_L2), "b-o")
 ax1.grid(which="both")
 ax1.set_xlabel("times (s)")
-ax1.set_ylabel("Bz (T)")
+ax1.set_ylabel("Rx (V/Am2)")
 ax1.set_title("Predicted and Observed Data")
 ax1.legend(["Observed", "L2 Inversion"], loc="upper right")
 plt.show()
 
-# Load the true model and layer thicknesses
-#true_conductivities = np.array([0.1, 1.0, 0.1])
-#true_layers = np.r_[40.0, 40.0, 160.0]
 
 # Plot true model and recovered model
 fig = plt.figure(figsize=(6, 6))
 
 ax1 = fig.add_axes([0.2, 0.15, 0.7, 0.7])
-#plot_1d_layer_model(true_layers, true_conductivities, ax=ax1, color="k")
 plot_1d_layer_model(
     layer_thicknesses, log_conductivity_map * recovered_model_L2, ax=ax1, color="b"
 )
 ax1.grid()
 ax1.set_xlabel(r"Resistivity ($\Omega m$)")
-#x_min, x_max = true_conductivities.min(), true_conductivities.max()
-#ax1.set_xlim(0.8 * x_min, 1.5 * x_max)
-#ax1.set_ylim([np.sum(true_layers), 0])
-ax1.legend(["True Model", "L2-Model"])
+ax1.legend(["L2-Model"])
 plt.show()
 
 # could cut here
-
-sys.exit()
+#sys.exit()
